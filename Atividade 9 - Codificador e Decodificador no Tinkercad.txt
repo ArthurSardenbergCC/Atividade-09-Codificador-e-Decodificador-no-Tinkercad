@@ -1,0 +1,201 @@
+1) Código para Decodificador 2 para 4
+int pinoBotaoA = 7; 
+int pinoBotaoB = 6; 
+int led0 = 13; 
+int led1 = 12; 
+int led2 = 11; 
+int led3 = 10; 
+
+void setup() {
+  pinMode(pinoBotaoA, INPUT_PULLUP);
+  pinMode(pinoBotaoB, INPUT_PULLUP);
+  pinMode(led0, OUTPUT);
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(led3, OUTPUT);
+}
+
+void loop() {
+  int A = !digitalRead(pinoBotaoB); 
+  int B = !digitalRead(pinoBotaoA); 
+
+  digitalWrite(led0, LOW);
+  digitalWrite(led1, LOW);
+  digitalWrite(led2, LOW);
+  digitalWrite(led3, LOW);
+ 
+  if (A == 0 && B == 0) {
+    digitalWrite(led0, HIGH);
+  } 
+  else if (A == 0 && B == 1) {
+    digitalWrite(led1, HIGH);
+  } 
+  else if (A == 1 && B == 0) {
+    digitalWrite(led2, HIGH);
+  } 
+  else if (A == 1 && B == 1) {
+    digitalWrite(led3, HIGH);
+  }
+
+  delay(50); 
+}
+
+
+2) Código para Codificador 4 para 2
+
+int botao1 = 4; 
+int botao2 = 5; 
+int botao3 = 6; 
+int botao4 = 7; 
+int LED1 = 10; 
+int LED2 = 11; 
+
+void setup() {
+  pinMode(botao1, INPUT_PULLUP);
+  pinMode(botao2, INPUT_PULLUP);
+  pinMode(botao3, INPUT_PULLUP);
+  pinMode(botao4, INPUT_PULLUP);
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+}
+
+void loop() {
+  int b1 = !digitalRead(botao1);
+  int b2 = !digitalRead(botao2);
+  int b3 = !digitalRead(botao3);
+  int b4 = !digitalRead(botao4);
+  int L1 = LOW;
+  int L2 = LOW;
+  
+  if (b4 == HIGH) { 
+    L2 = HIGH
+    L1 = HIGH
+  } else if (b3 == HIGH) { 
+    L2 = HIGH;
+    L1 = LOW;
+  } else if (b2 == HIGH) { 
+    L2 = LOW;
+    L1 = HIGH;
+  } else if (b1 == HIGH) { 
+    L2 = LOW;
+    L1 = LOW;
+  }
+  
+  digitalWrite(LED2, L2); 
+  digitalWrite(LED1, L1); 
+
+  delay(50); 
+}
+
+
+3) Código para Decodificador 3 para 8
+
+int pinoBotaoA = 2; 
+int pinoBotaoB = 3; 
+int pinoBotaoC = 4; 
+
+int leds[8] = {5, 6, 7, 8, 9, 10, 11, 12};
+
+void setup() {
+  pinMode(pinoBotaoA, INPUT_PULLUP);
+  pinMode(pinoBotaoB, INPUT_PULLUP);
+  pinMode(pinoBotaoC, INPUT_PULLUP);
+  for (int i = 0; i < 8; i++) {
+    pinMode(leds[i], OUTPUT);
+  }
+}
+
+void loop() {
+  int A = !digitalRead(pinoBotaoA); 
+  int B = !digitalRead(pinoBotaoB); 
+  int C = !digitalRead(pinoBotaoC); 
+
+  int valorDecimal = (A * 4) + (B * 2) + (C * 1);
+  
+  for (int i = 0; i < 8; i++) {
+    digitalWrite(leds[i], LOW);
+  }
+
+  digitalWrite(leds[valorDecimal], HIGH);
+
+  delay(50); // Pequena pausa para estabilidade
+}
+
+
+4) Código para Sistema híbrido
+
+int pinoModo = 2; 
+int pinos4_EntradaSaida[4] = {4, 5, 6, 7};
+int pinos2_SaidaEntrada[2] = {10, 11}; 
+
+void configurarCodificador() {
+  for (int i = 0; i < 4; i++) {
+    pinMode(pinos4_EntradaSaida[i], INPUT_PULLUP); 
+  }
+  for (int i = 0; i < 2; i++) {
+    pinMode(pinos2_SaidaEntrada[i], OUTPUT); 
+  }
+}
+
+void configurarDecodificador() {
+  for (int i = 0; i < 4; i++) {
+    pinMode(pinos4_EntradaSaida[i], OUTPUT); 
+    digitalWrite(pinos4_EntradaSaida[i], LOW); 
+  }
+  for (int i = 0; i < 2; i++) {
+    pinMode(pinos2_SaidaEntrada[i], INPUT_PULLUP); 
+  }
+}
+
+void setup() {
+  pinMode(pinoModo, INPUT_PULLUP); 
+}
+
+void modoCodificador() {
+  int I0 = !digitalRead(pinos4_EntradaSaida[0]); 
+  int I1 = !digitalRead(pinos4_EntradaSaida[1]); 
+  int I2 = !digitalRead(pinos4_EntradaSaida[2]); 
+  int I3 = !digitalRead(pinos4_EntradaSaida[3]); 
+  int Q0 = LOW; 
+  int Q1 = LOW; 
+
+  if (I3) {
+    Q1 = HIGH; Q0 = HIGH; 
+  } else if (I2) {
+    Q1 = HIGH; Q0 = LOW;  
+  } else if (I1) {
+    Q1 = LOW; Q0 = HIGH;  
+  } else if (I0) {
+    Q1 = LOW; Q0 = LOW;  
+  }
+
+  digitalWrite(pinos2_SaidaEntrada[0], Q0);
+  digitalWrite(pinos2_SaidaEntrada[1], Q1);
+}
+
+void modoDecodificador() {
+  int B = !digitalRead(pinos2_SaidaEntrada[0]); // Bit LSB (D10)
+  int A = !digitalRead(pinos2_SaidaEntrada[1]); // Bit MSB (D11)
+
+  int indice = (A * 2) + B;
+
+  for (int i = 0; i < 4; i++) {
+    digitalWrite(pinos4_EntradaSaida[i], LOW);
+  }
+
+  digitalWrite(pinos4_EntradaSaida[indice], HIGH);
+}
+
+void loop() { 
+  int modo = digitalRead(pinoModo); 
+
+  if (modo == HIGH) {
+    configurarCodificador(); 
+    modoCodificador();
+  } else {
+    configurarDecodificador(); 
+    modoDecodificador();
+  }
+  
+  delay(100); 
+}
